@@ -2,7 +2,6 @@ package com.github.amrmsaraya.tmdb.utils
 
 import androidx.room.TypeConverter
 import com.github.amrmsaraya.tmdb.data.model.artist.Artist
-import com.github.amrmsaraya.tmdb.data.model.artist.Cast
 import com.github.amrmsaraya.tmdb.data.model.artist.Credit
 import com.github.amrmsaraya.tmdb.data.model.cast.CastList
 import com.github.amrmsaraya.tmdb.data.model.movie.Movie
@@ -32,8 +31,6 @@ class Converters {
         val type = object : TypeToken<List<TvShow>>() {}.type
         return Gson().fromJson(string, type)
     }
-
-
 
     @TypeConverter
     fun fromArtist(artist: List<Artist>): String? {

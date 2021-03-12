@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/movies"
+        android:icon="@drawable/ic_baseline_movie_24"
+        android:title="Movies" />
+    <item
+        android:id="@+id/tv"
+        android:icon="@drawable/ic_baseline_live_tv_24"
+        android:enabled="true"
+        android:title="TV" />
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_baseline_search_24"
+        android:title="Search" />
+    <item
+        android:id="@+id/artists"
+        android:icon="@drawable/ic_outline_person_24"
+        android:title="Artists" />
+    <item
+        android:id="@+id/favorites"
+        android:icon="@drawable/ic_baseline_favorite_border_24"
+        android:title="Favorites" />
+</menu>

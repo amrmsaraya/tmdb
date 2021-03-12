@@ -14,7 +14,7 @@ class TvShowRepoImpl(
     private val tvShowCacheDataSource: TvShowCacheDataSource
 ) : TvShowRepo {
     override suspend fun getTvShow(id: Int): TvShow? {
-        TODO("Not yet implemented")
+        return getTvShowFromCache(id)
     }
 
     override suspend fun getTvShows(category: String): TvShowList? {
@@ -22,7 +22,12 @@ class TvShowRepoImpl(
     }
 
     override suspend fun updateTvShow(id: Int): TvShow? {
-        TODO("Not yet implemented")
+        val tvShow = getTvShowFromAPI(id)
+        if (tvShow != null) {
+            tvShowLocalDataSource.insertTvShowToDB(tvShow)
+            tvShowCacheDataSource.saveTvShowToCache(tvShow)
+        }
+        return tvShow
     }
 
     override suspend fun updateTvShows(category: String): TvShowList? {
@@ -40,6 +45,23 @@ class TvShowRepoImpl(
             val body = response.body()
             if (body != null) {
                 body.category = category
+            }
+            body
+        } catch (exception: Exception) {
+            Log.i("myTag", exception.message.toString())
+            null
+        }
+    }
+
+    suspend fun getTvShowFromAPI(id: Int): TvShow? {
+        return try {
+            val response = tvShowRemoteDataSource.getTvShow(id)
+            val body = response.body()
+            if (body != null) {
+                val castListResponse = tvShowRemoteDataSource.getCast(id)
+                if (castListResponse.body() != null) {
+                    body.castList = castListResponse.body()
+                }
             }
             body
         } catch (exception: Exception) {
@@ -66,6 +88,24 @@ class TvShowRepoImpl(
         return tvShowList
     }
 
+    suspend fun getTvShowFromDB(id: Int): TvShow? {
+        var tvShow: TvShow? = null
+        try {
+            tvShow = tvShowLocalDataSource.getTvShowFromDB(id)
+        } catch (exception: Exception) {
+            Log.i("myTag", exception.message.toString())
+        }
+        if (tvShow != null) {
+            return tvShow
+        } else {
+            tvShow = getTvShowFromAPI(id)
+            if (tvShow != null) {
+                tvShowLocalDataSource.insertTvShowToDB(tvShow)
+            }
+        }
+        return tvShow
+    }
+
     private suspend fun getTvShowsFromCache(category: String): TvShowList? {
         var tvShowList: TvShowList? = null
         try {
@@ -82,5 +122,29 @@ class TvShowRepoImpl(
             }
         }
         return tvShowList
+    }
+
+    suspend fun getTvShowFromCache(id: Int): TvShow? {
+        var tvShowList = emptyList<TvShow>()
+        try {
+            tvShowList = tvShowCacheDataSource.getTvShowFromCache()
+        } catch (exception: Exception) {
+            Log.i("myTag", exception.message.toString())
+        }
+        if (tvShowList.isNotEmpty()) {
+            tvShowList.forEach {
+                if (it.id == id) {
+                    return it
+                }
+            }
+            return null
+        } else {
+            val tvShow = getTvShowFromDB(id)
+            if (tvShow != null) {
+                tvShowCacheDataSource.saveTvShowToCache(tvShow)
+                return tvShow
+            }
+            return null
+        }
     }
 }

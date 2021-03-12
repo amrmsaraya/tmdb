@@ -14,7 +14,7 @@ class ArtistRepoImpl(
     private val artistCacheDataSource: ArtistCacheDataSource
 ) : ArtistRepo {
     override suspend fun getArtist(id: Int): Artist? {
-        TODO("Not yet implemented")
+        return getArtistFromCache(id)
     }
 
     override suspend fun getArtists(): ArtistList? {
@@ -22,7 +22,12 @@ class ArtistRepoImpl(
     }
 
     override suspend fun updateArtist(id: Int): Artist? {
-        TODO("Not yet implemented")
+        val artist = getArtistFromAPI(id)
+        if (artist != null) {
+            artistLocalDataSource.insertArtistToDB(artist)
+            artistCacheDataSource.saveArtistToCache(artist)
+        }
+        return artist
     }
 
     override suspend fun updateArtists(): ArtistList? {
@@ -38,6 +43,23 @@ class ArtistRepoImpl(
         return try {
             val response = artistRemoteDataSource.getArtists()
             response.body()
+        } catch (exception: Exception) {
+            Log.i("myTag", exception.message.toString())
+            null
+        }
+    }
+
+    suspend fun getArtistFromAPI(id: Int): Artist? {
+        return try {
+            val response = artistRemoteDataSource.getArtist(id)
+            val body = response.body()
+            if (body != null) {
+                val creditResponse = artistRemoteDataSource.getCredit(id)
+                if (creditResponse.body() != null) {
+                    body.credit = creditResponse.body()
+                }
+            }
+            body
         } catch (exception: Exception) {
             Log.i("myTag", exception.message.toString())
             null
@@ -62,6 +84,25 @@ class ArtistRepoImpl(
         return artistList
     }
 
+    suspend fun getArtistFromDB(id: Int): Artist? {
+        var artist: Artist? = null
+        try {
+            artist = artistLocalDataSource.getArtistFromDB(id)
+        } catch (exception: Exception) {
+            Log.i("myTag", exception.message.toString())
+        }
+        if (artist != null) {
+            return artist
+        } else {
+            artist = getArtistFromAPI(id)
+            if (artist != null) {
+                artistLocalDataSource.insertArtistToDB(artist)
+            }
+        }
+        return artist
+    }
+
+
     suspend fun getArtistsFromCache(): ArtistList? {
         var artistList: ArtistList? = null
         try {
@@ -78,5 +119,29 @@ class ArtistRepoImpl(
             }
         }
         return artistList
+    }
+
+    suspend fun getArtistFromCache(id: Int): Artist? {
+        var artistList = emptyList<Artist>()
+        try {
+            artistList = artistCacheDataSource.getArtistFromCache()
+        } catch (exception: Exception) {
+            Log.i("myTag", exception.message.toString())
+        }
+        if (artistList.isNotEmpty()) {
+            artistList.forEach {
+                if (it.id == id) {
+                    return it
+                }
+            }
+            return null
+        } else {
+            val artist = getArtistFromDB(id)
+            if (artist != null) {
+                artistCacheDataSource.saveArtistToCache(artist)
+                return artist
+            }
+            return null
+        }
     }
 }

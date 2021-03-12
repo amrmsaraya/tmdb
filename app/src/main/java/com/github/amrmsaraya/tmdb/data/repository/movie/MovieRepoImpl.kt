@@ -14,7 +14,7 @@ class MovieRepoImpl(
     private val movieCacheDataSource: MovieCacheDataSource
 ) : MovieRepo {
     override suspend fun getMovie(id: Int): Movie? {
-        TODO("Not yet implemented")
+        return getMovieFromCache(id)
     }
 
     override suspend fun getMovies(category: String): MovieList? {
@@ -22,7 +22,12 @@ class MovieRepoImpl(
     }
 
     override suspend fun updateMovie(id: Int): Movie? {
-        TODO("Not yet implemented")
+        val movie = getMovieFromAPI(id)
+        if (movie != null) {
+            movieLocalDataSource.insertMovieToDB(movie)
+            movieCacheDataSource.saveMovieToCache(movie)
+        }
+        return movie
     }
 
     override suspend fun updateMovies(category: String): MovieList? {
@@ -40,6 +45,23 @@ class MovieRepoImpl(
             val body = response.body()
             if (body != null) {
                 body.category = category
+            }
+            body
+        } catch (exception: Exception) {
+            Log.i("myTag", exception.message.toString())
+            null
+        }
+    }
+
+    suspend fun getMovieFromAPI(id: Int): Movie? {
+        return try {
+            val response = movieRemoteDataSource.getMovie(id)
+            val body = response.body()
+            if (body != null) {
+                val castListResponse = movieRemoteDataSource.getCast(id)
+                if (castListResponse.body() != null) {
+                    body.castList = castListResponse.body()
+                }
             }
             body
         } catch (exception: Exception) {
@@ -66,6 +88,24 @@ class MovieRepoImpl(
         return movieList
     }
 
+    suspend fun getMovieFromDB(id: Int): Movie? {
+        var movie: Movie? = null
+        try {
+            movie = movieLocalDataSource.getMovieFromDB(id)
+        } catch (exception: Exception) {
+            Log.i("myTag", exception.message.toString())
+        }
+        if (movie != null) {
+            return movie
+        } else {
+            movie = getMovieFromAPI(id)
+            if (movie != null) {
+                movieLocalDataSource.insertMovieToDB(movie)
+            }
+        }
+        return movie
+    }
+
     suspend fun getMoviesFromCache(category: String): MovieList? {
         var movieList: MovieList? = null
         try {
@@ -82,5 +122,29 @@ class MovieRepoImpl(
             }
         }
         return movieList
+    }
+
+    suspend fun getMovieFromCache(id: Int): Movie? {
+        var movieList = emptyList<Movie>()
+        try {
+            movieList = movieCacheDataSource.getMovieFromCache()
+        } catch (exception: Exception) {
+            Log.i("myTag", exception.message.toString())
+        }
+        if (movieList.isNotEmpty()) {
+            movieList.forEach {
+                if (it.id == id) {
+                    return it
+                }
+            }
+            return null
+        } else {
+            val movie = getMovieFromDB(id)
+            if (movie != null) {
+                movieCacheDataSource.saveMovieToCache(movie)
+                return movie
+            }
+            return null
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.github.amrmsaraya.tmdb.data.repository.artist.datasourceImpl
 
 import com.github.amrmsaraya.tmdb.data.model.artist.Artist
 import com.github.amrmsaraya.tmdb.data.model.artist.ArtistList
+import com.github.amrmsaraya.tmdb.data.model.artist.Credit
 import com.github.amrmsaraya.tmdb.data.remote.TMDBService
 import com.github.amrmsaraya.tmdb.data.repository.artist.datasource.ArtistRemoteDataSource
 import retrofit2.Response
@@ -10,6 +11,10 @@ class ArtistRemoteDataSourceImpl(private val tmdbService: TMDBService, private v
     ArtistRemoteDataSource {
     override suspend fun getArtists(): Response<ArtistList> {
         return tmdbService.getPopularArtists(apiKey)
+    }
+
+    override suspend fun getCredit(id: Int): Response<Credit> {
+        return tmdbService.getCredits(id, apiKey)
     }
 
     override suspend fun getArtist(id: Int): Response<Artist> {

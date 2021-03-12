@@ -17,7 +17,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField "String","API_KEY","\"ad945e77103b3f2fa92ffe211d19786c\""
+        buildConfigField "String", "API_KEY", "\"ad945e77103b3f2fa92ffe211d19786c\""
     }
 
     buildTypes {
@@ -34,7 +34,6 @@ android {
         jvmTarget = '1.8'
     }
     buildFeatures {
-        dataBinding true
         viewBinding true
     }
 }

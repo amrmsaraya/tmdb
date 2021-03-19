@@ -1,5 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/nav_graph">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/moviesHomeFragment">
 
+    <fragment
+        android:id="@+id/moviesHomeFragment"
+        android:name="com.github.amrmsaraya.tmdb.presentation.ui.MoviesHomeFragment"
+        android:label="fragment_movies_home"
+        tools:layout="@layout/fragment_movies_home" >
+        <action
+            android:id="@+id/action_moviesHomeFragment_to_moviesCategoryFragment"
+            app:destination="@id/moviesCategoryFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/moviesCategoryFragment"
+        android:name="com.github.amrmsaraya.tmdb.presentation.ui.MoviesCategoryFragment"
+        android:label="fragment_movies_category"
+        tools:layout="@layout/fragment_movies_category" >
+        <action
+            android:id="@+id/action_moviesCategoryFragment_to_movieFragment"
+            app:destination="@id/movieFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/movieFragment"
+        android:name="com.github.amrmsaraya.tmdb.presentation.ui.MovieFragment"
+        android:label="fragment_movie"
+        tools:layout="@layout/fragment_movie" >
+        <action
+            android:id="@+id/action_movieFragment_to_artistFragment"
+            app:destination="@id/artistFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/artistFragment"
+        android:name="com.github.amrmsaraya.tmdb.presentation.ui.ArtistFragment"
+        android:label="fragment_artist"
+        tools:layout="@layout/fragment_artist" />
+    <fragment
+        android:id="@+id/popularArtistsFragment"
+        android:name="com.github.amrmsaraya.tmdb.presentation.ui.PopularArtistsFragment"
+        android:label="fragment_popular_artists"
+        tools:layout="@layout/fragment_popular_artists" >
+        <action
+            android:id="@+id/action_popularArtistsFragment_to_artistFragment"
+            app:destination="@id/artistFragment" />
+    </fragment>
 </navigation>

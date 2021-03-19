@@ -11,13 +11,13 @@
         android:enabled="true"
         android:title="TV" />
     <item
-        android:id="@+id/search"
-        android:icon="@drawable/ic_baseline_search_24"
-        android:title="Search" />
-    <item
         android:id="@+id/artists"
         android:icon="@drawable/ic_outline_person_24"
         android:title="Artists" />
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_baseline_search_24"
+        android:title="Search" />
     <item
         android:id="@+id/favorites"
         android:icon="@drawable/ic_baseline_favorite_border_24"
